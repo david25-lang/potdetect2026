@@ -134,3 +134,4 @@ In Postman, create a `POST` request, choose `Body > form-data`, add a key named 
 - Uploads are decoded with OpenCV and passed directly to Ultralytics YOLO.
 - Default upload size limit is 10 MB. Override it with `MAX_IMAGE_BYTES`.
 - CORS is enabled for all origins, methods, and headers for frontend integration.
+# potdetectbackend
