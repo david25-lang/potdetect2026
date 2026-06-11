@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+:root {
+  --background: 210 50% 98%;
+  --foreground: 215 28% 17%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 28% 17%;
+  --primary: 211 89% 46%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 215 20% 92%;
+  --secondary-foreground: 215 28% 17%;
+  --muted: 215 20% 92%;
+  --muted-foreground: 215 16% 42%;
+  --accent: 201 94% 42%;
+  --accent-foreground: 0 0% 100%;
+  --success: 144 63% 36%;
+  --success-foreground: 0 0% 100%;
+  --warning: 28 92% 53%;
+  --warning-foreground: 0 0% 100%;
+  --danger: 0 78% 52%;
+  --danger-foreground: 0 0% 100%;
+  --border: 214 24% 87%;
+  --input: 214 24% 87%;
+  --ring: 211 89% 46%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-danger: hsl(var(--danger));
+  --color-danger-foreground: hsl(var(--danger-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-space-grotesk);
+}
+
+.dark {
+  --background: 222 47% 10%;
+  --foreground: 210 40% 96%;
+  --card: 222 42% 13%;
+  --card-foreground: 210 40% 96%;
+  --primary: 211 92% 58%;
+  --primary-foreground: 222 47% 10%;
+  --secondary: 218 30% 22%;
+  --secondary-foreground: 210 40% 96%;
+  --muted: 218 30% 22%;
+  --muted-foreground: 215 20% 72%;
+  --accent: 196 92% 51%;
+  --accent-foreground: 222 47% 10%;
+  --success: 145 62% 44%;
+  --success-foreground: 222 47% 10%;
+  --warning: 32 95% 57%;
+  --warning-foreground: 222 47% 10%;
+  --danger: 0 86% 64%;
+  --danger-foreground: 222 47% 10%;
+  --border: 217 26% 25%;
+  --input: 217 26% 25%;
+  --ring: 211 92% 58%;
+}
+
+body {
+  background:
+    radial-gradient(1200px 500px at 90% -10%, hsl(var(--primary) / 0.18), transparent 65%),
+    radial-gradient(900px 420px at -10% 0%, hsl(var(--accent) / 0.14), transparent 55%),
+    hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-manrope), sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-space-grotesk), sans-serif;
+}
