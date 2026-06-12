@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPercent } from "@/lib/utils";
 
-const BACKEND_URL = "http://127.0.0.1:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
 interface YoloDetection {
   class_id: number;
