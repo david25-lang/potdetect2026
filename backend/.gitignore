@@ -7,5 +7,13 @@ venv/
 dist/
 build/
 .DS_Store
-models/*.onnx
+
+# Large model files — stored on Cloudinary, downloaded at build time
+extracted_model/best.onnx
+extracted_model/best.pt
+models/best_cnn.keras
+models/best_cnn.onnx
 models/road_damage.keras
+
+# Database is seeded fresh on each deploy
+data/detections.db

@@ -52,9 +52,9 @@ export function Navbar({
         </div>
 
         <div className="flex items-center gap-2">
-          <Link href="/dashboard" className="hidden md:inline-flex">
+          <Link href="/analytics" className="hidden md:inline-flex">
             <Button variant="outline" size="sm">
-              Dashboard
+              Analytics
             </Button>
           </Link>
           <Button

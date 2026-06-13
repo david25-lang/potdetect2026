@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: road-damage-backend
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: >
+      pip install --quiet tensorflow-cpu tf2onnx onnx ultralytics &&
+      python download_models.py &&
+      python convert_model.py &&
+      pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: CLOUDINARY_YOLO_ONNX_URL
+        sync: false
+      - key: CLOUDINARY_YOLO_PT_URL
+        sync: false
+      - key: CLOUDINARY_CNN_KERAS_URL
+        sync: false

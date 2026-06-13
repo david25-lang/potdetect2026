@@ -9,14 +9,12 @@ import {
   FlaskConical,
   GaugeCircle,
   GitCompareArrows,
-  LayoutDashboard,
   Settings,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "YOLO Detection", href: "/test-model", icon: FlaskConical },
   { label: "CNN Classification", href: "/classification", icon: BrainCircuit },
   { label: "Compare Models", href: "/compare", icon: GitCompareArrows },

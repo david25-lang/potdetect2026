@@ -37,7 +37,7 @@ export default function Home() {
               <Link href="/test-model">
                 <Button size="lg">Upload Image</Button>
               </Link>
-              <Link href="/dashboard">
+              <Link href="/analytics">
                 <Button size="lg" variant="outline">
                   Live Demo
                 </Button>
