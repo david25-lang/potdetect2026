@@ -2,9 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Camera, ScanSearch } from "lucide-react";
-
-import { CameraCapture } from "@/components/common/camera-capture";
+import { AlertTriangle, ScanSearch } from "lucide-react";
 import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { UploadZone } from "@/components/common/upload-zone";
 import { Button } from "@/components/ui/button";
@@ -21,7 +19,6 @@ interface ClassificationResult {
 
 export function ClassificationPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [showCamera, setShowCamera] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ClassificationResult | null>(null);
@@ -86,32 +83,15 @@ export function ClassificationPage() {
       {/* Upload section */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Upload Image</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => { setShowCamera((v) => !v); setError(null); }}
-            >
-              <Camera className="h-4 w-4" />
-              {showCamera ? "Use Upload" : "Use Camera"}
-            </Button>
-          </div>
+          <CardTitle>Upload Image</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {showCamera ? (
-            <CameraCapture
-              onCapture={(f) => { setFile(f); setResult(null); setError(null); setShowCamera(false); }}
-              onClose={() => setShowCamera(false)}
-            />
-          ) : (
-            <UploadZone
-              accept="image/*"
-              label="Upload a road image for CNN classification"
-              onFileSelect={(f) => { setFile(f); setResult(null); setError(null); }}
-              type="image"
-            />
-          )}
+          <UploadZone
+            accept="image/*"
+            label="Upload a road image for CNN classification"
+            onFileSelect={(f) => { setFile(f); setResult(null); setError(null); }}
+            type="image"
+          />
 
           {previewUrl ? (
             <div className="relative aspect-video overflow-hidden rounded-md border border-border/60">
@@ -127,12 +107,12 @@ export function ClassificationPage() {
 
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={handleClassify} disabled={!file || loading}>
-              {loading ? "Analyzing…" : "Classify"}
+              {loading ? "Processing…" : "Classify"}
             </Button>
             <Button variant="outline" onClick={handleReset} disabled={loading}>
               Reset
             </Button>
-            {loading ? <LoadingSpinner label="Analyzing image…" /> : null}
+            {loading ? <LoadingSpinner label="Processing…" /> : null}
           </div>
 
           {error ? (

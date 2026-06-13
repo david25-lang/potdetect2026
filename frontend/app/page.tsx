@@ -1,11 +1,22 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
-import { stats } from "@/lib/mock-data";
+import { fetchAnalytics } from "@/lib/api";
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
+  const [totals, setTotals] = useState({ uploads: 0, potholes: 0, cracks: 0 });
+
+  useEffect(() => {
+    fetchAnalytics()
+      .then((data) => setTotals(data.totals))
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -75,14 +86,14 @@ export default function Home() {
             <Card>
               <CardContent className="pt-6">
                 <p className="text-sm text-muted-foreground">Images Processed</p>
-                <p className="mt-2 text-3xl font-semibold">{stats.imagesProcessed.toLocaleString()}</p>
+                <p className="mt-2 text-3xl font-semibold">{totals.uploads.toLocaleString()}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6">
                 <p className="text-sm text-muted-foreground">Potholes Detected</p>
                 <p className="mt-2 text-3xl font-semibold text-warning">
-                  {stats.potholesDetected.toLocaleString()}
+                  {totals.potholes.toLocaleString()}
                 </p>
               </CardContent>
             </Card>
@@ -90,7 +101,7 @@ export default function Home() {
               <CardContent className="pt-6">
                 <p className="text-sm text-muted-foreground">Cracks Detected</p>
                 <p className="mt-2 text-3xl font-semibold text-danger">
-                  {stats.cracksDetected.toLocaleString()}
+                  {totals.cracks.toLocaleString()}
                 </p>
               </CardContent>
             </Card>

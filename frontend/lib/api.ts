@@ -1,43 +1,30 @@
-import { analyticsMock, recentDetections } from "@/lib/mock-data";
 import type { AnalyticsResponse, DetectionResponse, HistoryRecord } from "@/lib/types";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
 const predictUrl = `${API_BASE_URL}/predict/`;
 const annotatedUrl = `${API_BASE_URL}/predict-annotated/`;
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-function maybeFail() {
-  if (Math.random() < 0.08) {
-    throw new Error("Service temporarily unavailable. Please retry.");
-  }
-}
-
 export async function detectImage(file: File): Promise<DetectionResponse> {
-  const prediction = await postDetectionFile(predictUrl, file, "image");
-  const annotated = await postDetectionFile(annotatedUrl, file, "image").catch(() => null);
-
-  return mergeDetectionResponses(prediction, annotated);
+  // predict-annotated returns detections + drawn image in a single call
+  return postDetectionFile(annotatedUrl, file, "image");
 }
 
 export async function detectVideo(file: File): Promise<DetectionResponse> {
-  const prediction = await postDetectionFile(predictUrl, file, "video");
-  const annotated = await postDetectionFile(annotatedUrl, file, "video").catch(() => null);
-
-  return mergeDetectionResponses(prediction, annotated);
+  return postDetectionFile(annotatedUrl, file, "video");
 }
 
 export async function fetchHistory(): Promise<HistoryRecord[]> {
-  await delay(900);
-  maybeFail();
-  return recentDetections;
+  const res = await fetch(`${API_BASE_URL}/history`);
+  if (!res.ok) throw new Error(`Failed to load history (${res.status}).`);
+  return res.json() as Promise<HistoryRecord[]>;
 }
 
 export async function fetchAnalytics(): Promise<AnalyticsResponse> {
-  await delay(950);
-  maybeFail();
-  return analyticsMock;
+  const res = await fetch(`${API_BASE_URL}/analytics`);
+  if (!res.ok) throw new Error(`Failed to load analytics (${res.status}).`);
+  return res.json() as Promise<AnalyticsResponse>;
 }
 
 export const apiRoutes = {
@@ -57,7 +44,7 @@ async function postDetectionFile(
   mediaType: DetectionMediaType
 ): Promise<DetectionResponse> {
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("image", file);
 
   const response = await fetch(url, {
     method: "POST",
@@ -87,20 +74,6 @@ async function postDetectionFile(
   return normalizeDetectionResponse({ result: text }, mediaType);
 }
 
-function mergeDetectionResponses(
-  primary: DetectionResponse,
-  secondary: DetectionResponse | null
-): DetectionResponse {
-  if (!secondary) {
-    return primary;
-  }
-
-  return {
-    detections: secondary.detections.length > 0 ? secondary.detections : primary.detections,
-    processed_image: secondary.processed_image ?? primary.processed_image,
-    processed_video: secondary.processed_video ?? primary.processed_video,
-  };
-}
 
 function normalizeDetectionResponse(data: unknown, mediaType: DetectionMediaType): DetectionResponse {
   if (!isRecord(data)) {
@@ -136,7 +109,7 @@ function normalizeDetections(value: unknown): DetectionResponse["detections"] {
         return [];
       }
 
-      const label = getString(item.class) ?? getString(item.label) ?? getString(item.name);
+      const label = getString(item.class_name) ?? getString(item.class) ?? getString(item.label) ?? getString(item.name);
       const confidence = getNumber(item.confidence) ?? getNumber(item.score) ?? getNumber(item.probability);
 
       return label && confidence !== null ? [{ class: label, confidence: normalizeConfidence(confidence) }] : [];
@@ -163,6 +136,11 @@ function normalizeConfidence(confidence: number) {
 function resolveApiUrl(value: string | null) {
   if (!value) {
     return undefined;
+  }
+
+  // Backend returns annotated_image as a raw base64 string, not a URL
+  if (!value.startsWith("http") && !value.startsWith("/") && !value.startsWith("data:")) {
+    return `data:image/jpeg;base64,${value}`;
   }
 
   try {

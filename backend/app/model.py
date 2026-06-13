@@ -51,8 +51,8 @@ class YOLODetector:
         if onnx_path.exists():
             import onnxruntime as ort  # type: ignore
             opts = ort.SessionOptions()
-            opts.inter_op_num_threads = 1
-            opts.intra_op_num_threads = 1
+            opts.inter_op_num_threads = 0  # 0 = let onnxruntime pick optimal count
+            opts.intra_op_num_threads = 0
             self._session = ort.InferenceSession(
                 str(onnx_path),
                 sess_options=opts,

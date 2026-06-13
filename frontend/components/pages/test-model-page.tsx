@@ -3,9 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { AlertTriangle, Camera, CheckCircle2, ScanSearch, Target } from "lucide-react";
-
-import { CameraCapture } from "@/components/common/camera-capture";
+import { AlertTriangle, CheckCircle2, ScanSearch, Target } from "lucide-react";
 import { ConfidenceMeter } from "@/components/common/confidence-meter";
 import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { UploadZone } from "@/components/common/upload-zone";
@@ -31,7 +29,6 @@ interface BackendResponse {
 
 export function TestModelPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [showCamera, setShowCamera] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<BackendResponse | null>(null);
@@ -100,32 +97,15 @@ export function TestModelPage() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Upload Image</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => { setShowCamera((v) => !v); setError(null); }}
-            >
-              <Camera className="h-4 w-4" />
-              {showCamera ? "Use Upload" : "Use Camera"}
-            </Button>
-          </div>
+          <CardTitle>Upload Image</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {showCamera ? (
-            <CameraCapture
-              onCapture={(f) => { setFile(f); setResult(null); setError(null); setShowCamera(false); }}
-              onClose={() => setShowCamera(false)}
-            />
-          ) : (
-            <UploadZone
-              accept="image/*"
-              label="Upload a road image for YOLO inference"
-              onFileSelect={(f) => { setFile(f); setResult(null); setError(null); }}
-              type="image"
-            />
-          )}
+          <UploadZone
+            accept="image/*"
+            label="Upload a road image for YOLO inference"
+            onFileSelect={(f) => { setFile(f); setResult(null); setError(null); }}
+            type="image"
+          />
 
           {previewUrl ? (
             <div className="relative aspect-video overflow-hidden rounded-md border border-border/60">
@@ -141,12 +121,12 @@ export function TestModelPage() {
 
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={handleDetect} disabled={!file || loading}>
-              {loading ? "Running…" : "Detect"}
+              {loading ? "Processing…" : "Detect"}
             </Button>
             <Button variant="outline" onClick={handleReset} disabled={loading}>
               Reset
             </Button>
-            {loading ? <LoadingSpinner label="Sending to backend…" /> : null}
+            {loading ? <LoadingSpinner label="Processing…" /> : null}
           </div>
 
           {error ? <p className="text-sm text-danger">{error}</p> : null}

@@ -2,9 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Camera, CheckCircle2, ScanSearch, Target } from "lucide-react";
-
-import { CameraCapture } from "@/components/common/camera-capture";
+import { AlertTriangle, CheckCircle2, ScanSearch, Target } from "lucide-react";
 import { ConfidenceMeter } from "@/components/common/confidence-meter";
 import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { UploadZone } from "@/components/common/upload-zone";
@@ -38,7 +36,6 @@ type Status = "idle" | "loading" | "done" | "error";
 
 export function ComparePage() {
   const [file, setFile] = useState<File | null>(null);
-  const [showCamera, setShowCamera] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [yolo, setYolo] = useState<YoloResult | null>(null);
@@ -129,34 +126,17 @@ export function ComparePage() {
       {/* Input card */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Input Image</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => { setShowCamera((v) => !v); setError(null); }}
-            >
-              <Camera className="h-4 w-4" />
-              {showCamera ? "Use Upload" : "Use Camera"}
-            </Button>
-          </div>
+          <CardTitle>Input Image</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {showCamera ? (
-            <CameraCapture
-              onCapture={(f) => { onFileSelect(f); setShowCamera(false); }}
-              onClose={() => setShowCamera(false)}
-            />
-          ) : (
-            <UploadZone
-              accept="image/*"
-              label="Upload a road image to compare YOLO and CNN"
-              onFileSelect={onFileSelect}
-              type="image"
-            />
-          )}
+          <UploadZone
+            accept="image/*"
+            label="Upload a road image to compare YOLO and CNN"
+            onFileSelect={onFileSelect}
+            type="image"
+          />
 
-          {previewUrl && !showCamera ? (
+          {previewUrl ? (
             <div className="relative aspect-video overflow-hidden rounded-md border border-border/60">
               <Image src={previewUrl} alt="Selected image" fill className="object-contain" unoptimized />
             </div>
@@ -164,12 +144,12 @@ export function ComparePage() {
 
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={handleCompare} disabled={!file || status === "loading"}>
-              {status === "loading" ? "Running…" : "Compare"}
+              {status === "loading" ? "Processing…" : "Compare"}
             </Button>
             <Button variant="outline" onClick={handleReset} disabled={status === "loading"}>
               Reset
             </Button>
-            {status === "loading" ? <LoadingSpinner label="Running both models…" /> : null}
+            {status === "loading" ? <LoadingSpinner label="Processing…" /> : null}
           </div>
 
           {error ? (
