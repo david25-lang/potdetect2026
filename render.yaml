@@ -14,9 +14,9 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.0"
-      - key: CLOUDINARY_YOLO_ONNX_URL
+      - key: MODEL_YOLO_ONNX_URL
         sync: false
-      - key: CLOUDINARY_YOLO_PT_URL
+      - key: MODEL_YOLO_PT_URL
         sync: false
-      - key: CLOUDINARY_CNN_KERAS_URL
+      - key: MODEL_CNN_KERAS_URL
         sync: false
