@@ -30,7 +30,7 @@ export function DetectionCard({ label, confidence }: DetectionCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="text-sm text-muted-foreground">
-        AI model confidence indicates this damage region should be prioritized in
+        Model confidence indicates this damage region should be prioritized in
         maintenance scheduling.
       </CardContent>
     </Card>

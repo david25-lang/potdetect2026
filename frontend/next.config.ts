@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+const parsedApi = new URL(rawApiUrl);
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -8,9 +11,9 @@ const nextConfig: NextConfig = {
         hostname: "images.unsplash.com",
       },
       {
-        protocol: "http",
-        hostname: "127.0.0.1",
-        port: "8000",
+        protocol: parsedApi.protocol.replace(":", "") as "http" | "https",
+        hostname: parsedApi.hostname,
+        ...(parsedApi.port ? { port: parsedApi.port } : {}),
       },
     ],
   },

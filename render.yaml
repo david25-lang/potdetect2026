@@ -5,18 +5,12 @@ services:
     region: oregon
     plan: free
     rootDir: backend
-    buildCommand: >
-      pip install --quiet tensorflow-cpu tf2onnx onnx ultralytics &&
-      python download_models.py &&
-      python convert_model.py &&
-      pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python download_models.py
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.0"
       - key: MODEL_YOLO_ONNX_URL
         sync: false
-      - key: MODEL_YOLO_PT_URL
-        sync: false
-      - key: MODEL_CNN_KERAS_URL
+      - key: MODEL_CNN_ONNX_URL
         sync: false

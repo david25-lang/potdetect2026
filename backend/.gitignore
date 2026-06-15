@@ -8,7 +8,7 @@ dist/
 build/
 .DS_Store
 
-# Large model files — stored on Cloudinary, downloaded at build time
+# Large model files — stored on GitHub Releases, downloaded at build time
 extracted_model/best.onnx
 extracted_model/best.pt
 models/best_cnn.keras

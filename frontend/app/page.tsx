@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { fetchAnalytics } from "@/lib/api";
 import { Navbar } from "@/components/layout/navbar";
+import { FallingStrips } from "@/components/ui/falling-strips";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -18,19 +19,20 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen overflow-hidden">
+      <FallingStrips />
       <Navbar />
       <main>
         <section className="mx-auto grid w-full max-w-7xl gap-8 px-4 pb-16 pt-12 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
           <div className="space-y-6">
             <p className="inline-flex rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-              Smart City Infrastructure AI
+              Smart City Infrastructure
             </p>
             <h1 className="max-w-xl text-4xl font-bold tracking-tight sm:text-5xl">
               Road Damage Detection System
             </h1>
             <p className="max-w-xl text-lg text-muted-foreground">
-              AI-powered pothole and crack detection for municipal maintenance teams,
+              Smart pothole and crack detection for municipal maintenance teams,
               civil engineers, and mobility agencies.
             </p>
             <div className="flex flex-wrap gap-3">
@@ -65,18 +67,31 @@ export default function Home() {
         <section className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-semibold">Features</h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {["Pothole Detection", "Crack Detection", "Severity Analysis", "Real-Time Processing"].map(
-              (feature) => (
-                <Card key={feature}>
-                  <CardContent className="pt-6">
-                    <p className="font-semibold">{feature}</p>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Built for reliable infrastructure condition monitoring.
-                    </p>
-                  </CardContent>
-                </Card>
-              )
-            )}
+            {[
+              {
+                title: "Pothole Detection",
+                desc: "Automatically locates and marks potholes in road images using YOLOv8 bounding-box detection.",
+              },
+              {
+                title: "Crack Detection",
+                desc: "Identifies surface fractures and fissures with a ResNet50 CNN trained on labelled road damage data.",
+              },
+              {
+                title: "Severity Analysis",
+                desc: "Confidence scores from both models give maintenance teams a clear signal of damage severity.",
+              },
+              {
+                title: "Real-Time Processing",
+                desc: "Lightweight ONNX inference runs on CPU, keeping response times under 100 ms per uploaded image.",
+              },
+            ].map(({ title, desc }) => (
+              <Card key={title}>
+                <CardContent className="pt-6">
+                  <p className="font-semibold">{title}</p>
+                  <p className="mt-2 text-sm text-muted-foreground">{desc}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </section>
 
@@ -112,7 +127,7 @@ export default function Home() {
       <footer className="border-t border-border/60 py-6">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-2 px-4 text-sm text-muted-foreground sm:px-6 sm:flex-row lg:px-8">
           <p>Road Damage Detection System</p>
-          <p>Designed for modern civil engineering operations.</p>
+          <p>Designed for final year project.</p>
         </div>
       </footer>
     </div>

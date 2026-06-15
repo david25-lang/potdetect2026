@@ -16,7 +16,7 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: "Road Damage Detection System",
-  description: "AI-powered pothole and crack detection dashboard",
+  description: "Smart pothole and crack detection dashboard",
 };
 
 export default function RootLayout({

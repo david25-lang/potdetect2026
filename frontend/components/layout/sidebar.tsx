@@ -9,7 +9,6 @@ import {
   FlaskConical,
   GaugeCircle,
   GitCompareArrows,
-  Settings,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -20,7 +19,6 @@ const navItems = [
   { label: "Compare Models", href: "/compare", icon: GitCompareArrows },
   { label: "Detection History", href: "/history", icon: Clock3 },
   { label: "Analytics", href: "/analytics", icon: BarChart3 },
-  { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar({

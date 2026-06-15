@@ -1,10 +1,9 @@
 """
-Download model files from GitHub Releases (or any HTTPS URL) at Render build time.
+Download pre-built ONNX model files from GitHub Releases at Render build time.
 
 Set these environment variables in the Render dashboard:
-  MODEL_YOLO_ONNX_URL    – URL for extracted_model/best.onnx
-  MODEL_YOLO_PT_URL      – URL for extracted_model/best.pt
-  MODEL_CNN_KERAS_URL    – URL for models/best_cnn.keras
+  MODEL_YOLO_ONNX_URL   – URL for extracted_model/best.onnx  (YOLO)
+  MODEL_CNN_ONNX_URL    – URL for models/best_cnn.onnx        (CNN)
 
 Example (GitHub Release):
   https://github.com/YOUR_USER/YOUR_REPO/releases/download/v1.0-models/best.onnx
@@ -19,9 +18,8 @@ import urllib.request
 from pathlib import Path
 
 DOWNLOADS = [
-    ("MODEL_YOLO_ONNX_URL",  Path("extracted_model/best.onnx")),
-    ("MODEL_YOLO_PT_URL",    Path("extracted_model/best.pt")),
-    ("MODEL_CNN_KERAS_URL",  Path("models/best_cnn.keras")),
+    ("MODEL_YOLO_ONNX_URL", Path("extracted_model/best.onnx")),
+    ("MODEL_CNN_ONNX_URL",  Path("models/best_cnn.onnx")),
 ]
 
 
@@ -49,7 +47,7 @@ if __name__ == "__main__":
                 print(f"WARNING: {env_var} is not set and {dest} is missing.", file=sys.stderr)
                 any_missing = True
             else:
-                print(f"  skipping {dest.name} (already on disk, no URL set)")
+                print(f"  skipping {dest.name} (already on disk)")
         else:
             download(url, dest)
 
