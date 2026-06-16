@@ -34,6 +34,7 @@ class CNNClassifier:
         self._session: Any = None   # onnxruntime session
         self._keras_model: Any = None
         self._input_name: str = ""
+        self._input_dtype: str = "tensor(float)"
 
     def load(self) -> None:
         if self._session is not None or self._keras_model is not None:
@@ -57,6 +58,7 @@ class CNNClassifier:
                     providers=["CPUExecutionProvider"],
                 )
                 self._input_name = self._session.get_inputs()[0].name
+                self._input_dtype = self._session.get_inputs()[0].type  # e.g. "tensor(float16)"
                 logger.info("CNN loaded via onnxruntime from %s", onnx_path)
                 return
             except Exception as exc:
@@ -92,13 +94,15 @@ class CNNClassifier:
         resized = cv2.resize(image_bgr, (CNN_INPUT_SIZE, CNN_INPUT_SIZE))
         # ResNet50 backbone expects caffe-style preprocessing:
         # subtract ImageNet BGR channel means, keep 0-255 scale (no /255).
-        x = resized.astype("float32")   # already BGR from OpenCV
-        x[..., 0] -= 103.939           # B mean
-        x[..., 1] -= 116.779           # G mean
-        x[..., 2] -= 123.68            # R mean
+        x = resized.astype("float32")
+        x[..., 0] -= 103.939
+        x[..., 1] -= 116.779
+        x[..., 2] -= 123.68
         batch = x[np.newaxis]
 
         if self._session is not None:
+            if self._input_dtype == "tensor(float16)":
+                batch = batch.astype("float16")
             raw = self._session.run(None, {self._input_name: batch})[0][0]
         else:
             raw = self._keras_model.predict(batch, verbose=0)[0]
