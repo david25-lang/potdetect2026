@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import gc
 import logging
 from contextlib import asynccontextmanager
 from typing import Any, Optional
@@ -54,6 +55,7 @@ async def predict(
 ) -> dict[str, Any]:
     image_array = await _read_request_image(image)
     detections = _predict(image_array, confidence)
+    gc.collect()
     return {"detections": detections}
 
 
@@ -77,6 +79,7 @@ async def predict_annotated(
         raise HTTPException(status_code=500, detail="YOLO inference failed.") from exc
 
     record_yolo_scan(image.filename or "unknown", detections)
+    gc.collect()
 
     return {
         "detections": detections,
@@ -109,6 +112,7 @@ async def classify(
         raise HTTPException(status_code=500, detail="CNN classification failed.") from exc
 
     record_cnn_scan(image.filename or "unknown", result)
+    gc.collect()
     return result
 
 
