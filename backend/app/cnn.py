@@ -11,7 +11,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 _MODELS_DIR = Path(__file__).resolve().parents[1] / "models"
-DEFAULT_ONNX_PATH = _MODELS_DIR / "best_cnn.onnx"
+DEFAULT_ONNX_PATH = _MODELS_DIR / "best_cnn_fp16.onnx"
 DEFAULT_KERAS_PATH = _MODELS_DIR / "best_cnn.keras"
 
 CNN_CLASSES = ["crack", "pothole"]

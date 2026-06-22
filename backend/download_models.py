@@ -19,7 +19,7 @@ from pathlib import Path
 
 DOWNLOADS = [
     ("MODEL_YOLO_ONNX_URL", Path("extracted_model/best.onnx")),
-    ("MODEL_CNN_ONNX_URL",  Path("models/best_cnn.onnx")),
+    ("MODEL_CNN_ONNX_URL",  Path("models/best_cnn_fp16.onnx")),
 ]
 
 

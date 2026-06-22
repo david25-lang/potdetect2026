@@ -86,7 +86,7 @@ class YOLODetector:
     # ------------------------------------------------------------------
 
     def predict(self, image: np.ndarray, confidence: Optional[float] = None) -> list[dict]:
-        conf = confidence if confidence is not None else 0.25
+        conf = confidence if confidence is not None else 0.30
         if self._session is not None:
             return self._infer_onnx(image, conf, iou=0.45)
         return self._infer_ultralytics(image, conf)
@@ -97,7 +97,7 @@ class YOLODetector:
         confidence: Optional[float] = None,
         iou: Optional[float] = None,
     ) -> tuple[list[dict], np.ndarray]:
-        conf = confidence if confidence is not None else 0.25
+        conf = confidence if confidence is not None else 0.30
         nms_iou = iou if iou is not None else 0.45
 
         if self._session is not None:
@@ -144,12 +144,22 @@ class YOLODetector:
         x2 = (boxes_xywh[:, 0] + boxes_xywh[:, 2] / 2) * orig_w / iw
         y2 = (boxes_xywh[:, 1] + boxes_xywh[:, 3] / 2) * orig_h / ih
 
-        boxes_list = np.stack([x1, y1, x2 - x1, y2 - y1], axis=1).tolist()
-        indices = cv2.dnn.NMSBoxes(boxes_list, confidences.tolist(), conf_thr, iou)
+        boxes_xywh_list = np.stack([x1, y1, x2 - x1, y2 - y1], axis=1)
+
+        # Per-class NMS: a pothole and a crack in the same region both survive
+        kept = []
+        for cls in np.unique(class_ids):
+            mask_cls = class_ids == cls
+            idx_cls = np.where(mask_cls)[0]
+            nms_in = boxes_xywh_list[mask_cls].tolist()
+            conf_in = confidences[mask_cls].tolist()
+            result = cv2.dnn.NMSBoxes(nms_in, conf_in, conf_thr, iou)
+            if len(result):
+                for r in (result.flatten() if hasattr(result, "flatten") else result):
+                    kept.append(idx_cls[int(r)])
 
         detections = []
-        for idx in (indices.flatten() if hasattr(indices, "flatten") else indices):
-            i = int(idx)
+        for i in kept:
             detections.append({
                 "class_id": int(class_ids[i]),
                 "class_name": self._class_names.get(int(class_ids[i]), str(class_ids[i])),
@@ -190,16 +200,43 @@ class YOLODetector:
     # Annotation (cv2 — no ultralytics needed)
     # ------------------------------------------------------------------
 
-    _COLORS = {0: (0, 100, 255), 1: (0, 220, 100)}  # pothole=orange-ish, crack=green
+    # pothole = bright orange, crack = bright cyan
+    _COLORS = {0: (0, 165, 255), 1: (255, 220, 0)}
 
     def _draw(self, image: np.ndarray, detections: list[dict]) -> np.ndarray:
+        h, w = image.shape[:2]
+        font       = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.65
+        thickness  = 3
+        pad        = 6
+
         for det in detections:
             x1, y1, x2, y2 = (int(v) for v in det["bbox"])
+            # clamp to image bounds
+            x1, y1 = max(0, x1), max(0, y1)
+            x2, y2 = min(w - 1, x2), min(h - 1, y2)
+
             color = self._COLORS.get(det["class_id"], (200, 200, 200))
-            label = f"{det['class_name']} {det['confidence']:.0%}"
-            cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
-            (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.55, 1)
-            cv2.rectangle(image, (x1, y1 - th - 6), (x1 + tw + 4, y1), color, -1)
-            cv2.putText(image, label, (x1 + 2, y1 - 4),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 1, cv2.LINE_AA)
+            label = f"{det['class_name'].upper()}  {det['confidence']:.0%}"
+
+            # bounding box
+            cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness)
+
+            # label background — place below box if too close to top
+            (tw, th), _ = cv2.getTextSize(label, font, font_scale, 2)
+            label_y = y1 - th - pad * 2
+            if label_y < 0:
+                label_y = y2 + pad   # flip below box
+
+            cv2.rectangle(
+                image,
+                (x1, label_y),
+                (x1 + tw + pad * 2, label_y + th + pad * 2),
+                color, -1,
+            )
+            cv2.putText(
+                image, label,
+                (x1 + pad, label_y + th + pad),
+                font, font_scale, (0, 0, 0), 2, cv2.LINE_AA,
+            )
         return image

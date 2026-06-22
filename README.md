@@ -376,59 +376,236 @@ On first startup with an empty database, 20 historical seed records (spread over
 
 ```
 finalproject2026/
-  backend/        ← FastAPI + AI inference (this repo)
-  frontend/       ← React/Next.js dashboard
-  render.yaml     ← Render deployment config
+├── backend/                         FastAPI + AI inference
+│   ├── app/
+│   │   ├── main.py                  API routes, startup
+│   │   ├── model.py                 YOLODetector (ONNX inference)
+│   │   ├── cnn.py                   CNNClassifier (ONNX inference)
+│   │   ├── database.py              SQLite helpers
+│   │   └── utils.py                 Image decode, base64 encode
+│   ├── download_models.py           Render build-time model downloader
+│   ├── convert_model.py             Keras/PT → ONNX conversion (local)
+│   ├── quantize_models.py           ONNX → INT8/FP16 quantisation (local)
+│   ├── requirements.txt
+│   └── render.yaml
+│
+└── frontend/                        Next.js 16 web application
+    ├── app/
+    │   ├── page.tsx                 Home / landing page
+    │   ├── layout.tsx               Root layout with theme provider
+    │   ├── upload-image/page.tsx    Image detection
+    │   ├── upload-video/page.tsx    Video detection
+    │   ├── classification/page.tsx  CNN classification
+    │   ├── compare/page.tsx         Side-by-side model comparison
+    │   ├── test-model/page.tsx      YOLO detection with detail table
+    │   ├── history/page.tsx         Detection history
+    │   └── analytics/page.tsx       Analytics dashboard
+    ├── components/
+    │   ├── layout/                  Navbar, Sidebar, DashboardShell
+    │   ├── pages/                   Page-level business logic
+    │   ├── common/                  Reusable feature components
+    │   └── ui/                      Primitive components (Button, Card, etc.)
+    ├── lib/
+    │   ├── api.ts                   Backend API client
+    │   ├── types.ts                 TypeScript interfaces
+    │   └── utils.ts                 Utility functions
+    ├── package.json
+    ├── next.config.ts
+    └── vercel.json
 ```
+
+---
+
+## Frontend
+
+### Technology Stack
+
+| Technology | Version | Purpose |
+|---|---|---|
+| Next.js | 16.2.7 | React framework, routing |
+| React | 19.2.4 | UI library |
+| TypeScript | 5.x | Type safety |
+| Tailwind CSS | 4.x | Styling |
+| Recharts | 3.8.1 | Analytics charts |
+| React Hook Form | 7.78.0 | Form handling |
+| Zod | 4.4.3 | Validation |
+| Lucide React | 1.17.0 | Icons |
+| next-themes | 0.4.6 | Dark / light mode |
+
+### Pages and Features
+
+| Route | Feature | Description |
+|---|---|---|
+| `/` | Home | Landing page with live statistics (total uploads, potholes, cracks) fetched from the backend |
+| `/test-model` | YOLO Detection | Upload an image, run YOLOv8 detection, view annotated result with bounding boxes and a detection detail table |
+| `/classification` | CNN Classification | Upload an image, run ResNet50 classification, view predicted class and confidence percentage |
+| `/upload-image` | Image Detection | Full image upload pipeline with side-by-side original and annotated result |
+| `/upload-video` | Video Detection | Upload a video file, process frame by frame, download annotated video |
+| `/compare` | Compare Models | Run YOLO and CNN on the same image simultaneously and view results side by side |
+| `/history` | Detection History | Searchable, filterable table of all past scans stored in the database |
+| `/analytics` | Analytics Dashboard | Statistics cards + three Recharts visualisations (trend line, distribution pie, accuracy bar) |
+
+### How to Use the Application
+
+**Detecting road damage in an image:**
+1. Open the app at `https://potdet.vercel.app`
+2. Click **YOLO Detection** in the sidebar
+3. Drag and drop a road image or click **Browse Files**
+4. Click **Detect**
+5. The annotated image appears with bounding boxes around detected damage
+6. Each detection shows the damage type and confidence score
+
+**Classifying an image:**
+1. Click **CNN Classification** in the sidebar
+2. Upload a road surface image
+3. Click **Classify**
+4. The model returns whether the image shows a pothole or crack and its confidence
+
+**Comparing both models:**
+1. Click **Compare Models** in the sidebar
+2. Upload one image
+3. Both models run simultaneously
+4. Results appear side by side
+
+**Viewing past scans:**
+1. Click **Detection History** in the sidebar
+2. All past scans are listed with their results
+3. Use the search box to find a specific file or filter by damage type
+
+**Viewing analytics:**
+1. Click **Analytics** in the top right or sidebar
+2. View total statistics at the top
+3. Scroll down to see the trend chart, distribution pie chart, and accuracy chart
+
+### UI Components
+
+**Layout:**
+- `Navbar` — Sticky header with logo, hamburger menu (mobile), analytics link, theme toggle
+- `Sidebar` — Navigation menu with links to all pages; shows System Health indicator
+- `DashboardShell` — Wrapper providing consistent page layout with title and subtitle
+
+**Common:**
+- `UploadZone` — Drag-and-drop file uploader for images and videos
+- `DetectionCard` — Single detection with icon, class label, confidence badge
+- `ResultViewer` — Original vs. annotated image comparison display
+- `ConfidenceMeter` — Progress bar for confidence percentage
+- `StatisticsCard` — KPI card showing a metric and optional change percentage
+- `AnalyticsCharts` — Combined chart panel (area, pie, bar)
 
 ---
 
 ## Local Development
 
+### Backend
+
 ```bash
-# 1. Python environment
+# 1. Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+# 2. Install dependencies
+pip install -r backend/requirements.txt
+
+# 3. Place model files
+#    backend/extracted_model/best.onnx   (YOLO)
+#    backend/models/best_cnn.onnx        (CNN)
+
+# 4. Start the server
 cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-
-# 2. Place model files (choose one option per model)
-#    CNN  → backend/models/best_cnn.onnx  (or best_cnn.keras for Keras fallback)
-#    YOLO → backend/extracted_model/best.onnx  (or best.pt for ultralytics fallback)
-
-# 3. Run
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Interactive API docs available at `http://localhost:8000/docs`.
+Interactive API docs: `http://localhost:8000/docs`
 
-To convert a trained `.keras` model to ONNX for production:
+To convert a trained model to ONNX:
 ```bash
 python convert_model.py
 ```
 
+### Frontend
+
+```bash
+# 1. Install dependencies
+cd frontend
+npm install
+
+# 2. Point to local backend
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+
+# 3. Start the dev server
+npm run dev
+```
+
+Frontend runs at `http://localhost:3000`.
+
 ---
 
-## Production Deployment (Render)
+## Production Deployment
 
-Configured via `render.yaml`:
+### Live URLs
 
-- **Build command:** `python download_models.py && pip install -r requirements.txt`
-- **Start command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+| Service | URL |
+|---|---|
+| Frontend (Vercel) | https://potdet.vercel.app |
+| Backend API (Render) | https://potdetect2026.onrender.com |
 
-`download_models.py` fetches ONNX files from GitHub Releases URLs at build time, skipping any file already on disk.
+### Backend — Render
+
+1. The `backend/` directory is deployed as a separate GitHub repository (`potdetectbackend`).
+2. On Render, create a new **Web Service** connected to that repository.
+3. In Render dashboard → Settings:
+   - **Root Directory:** `backend`
+   - **Build Command:** `pip install -r requirements.txt && python download_models.py`
+   - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. In Render dashboard → Environment, set:
+   - `MODEL_YOLO_ONNX_URL` — GitHub Release download URL for `best.onnx`
+   - `MODEL_CNN_ONNX_URL` — GitHub Release download URL for `best_cnn.onnx`
+   - `PYTHON_VERSION` — `3.11.0`
+
+`download_models.py` fetches both ONNX files from GitHub Releases at build time. No model files are committed to the repository.
+
+### Frontend — Vercel
+
+1. Connect the frontend repository to Vercel.
+2. In Vercel dashboard → Settings → Environment Variables, set:
+   - `NEXT_PUBLIC_API_URL` — `https://potdetect2026.onrender.com`
+3. Vercel auto-deploys on every push to `main`.
+
+### Keeping the Backend Alive (Free Tier)
+
+Render's free tier spins the service down after 15 minutes of inactivity, causing a 30–60 second cold-start delay on the next request. A cron job on [cron-job.org](https://cron-job.org) pings the health endpoint every 15 minutes to keep it warm:
+
+- **URL:** `https://potdetect2026.onrender.com/`
+- **Schedule:** Every 15 minutes
 
 ---
 
 ## Environment Variables
 
+### Backend
+
 | Variable | Required | Description |
-|----------|----------|-------------|
-| `MODEL_YOLO_ONNX_URL` | Production | URL to download `best.onnx` (YOLO) |
-| `MODEL_CNN_ONNX_URL` | Production | URL to download `best_cnn.onnx` (CNN) |
-| `CNN_MODEL_PATH` | Optional | Override path to CNN ONNX file |
-| `CNN_KERAS_PATH` | Optional | Override path to CNN Keras file |
-| `YOLO_MODEL_PATH` | Optional | Override path to YOLO ONNX file |
-| `YOLO_PT_PATH` | Optional | Override path to YOLO `.pt` file |
-| `YOLO_META_PATH` | Optional | Override path to `class_names.json` |
-| `DB_PATH` | Optional | Override SQLite database path |
+|---|---|---|
+| `MODEL_YOLO_ONNX_URL` | Production | Download URL for `best.onnx` (YOLO) |
+| `MODEL_CNN_ONNX_URL` | Production | Download URL for `best_cnn.onnx` (CNN) |
+| `PYTHON_VERSION` | Recommended | Python version for Render (`3.11.0`) |
+| `DB_PATH` | Optional | Custom SQLite database path |
+| `MAX_IMAGE_BYTES` | Optional | Max upload size in bytes (default: 10 MB) |
 | `CNN_INPUT_SIZE` | Optional | CNN input resolution (default: `224`) |
+| `CNN_MODEL_PATH` | Optional | Override path to CNN ONNX file |
+| `YOLO_MODEL_PATH` | Optional | Override path to YOLO ONNX file |
+
+### Frontend
+
+| Variable | Required | Description |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | Yes | Base URL of the backend API |
+
+---
+
+## Known Limitations
+
+- **Render free tier cold start:** If the backend has been idle for more than 15 minutes, the first request may take 30–60 seconds. The cron job reduces how often this happens.
+- **No GPU:** Inference runs on CPU only. Processing a single image takes approximately 1–3 seconds on Render's free tier.
+- **Database persistence:** The SQLite database resets on every new Render deployment. Seed data is inserted automatically on first run so the analytics dashboard always has data.
+- **Video processing:** Frame-by-frame video detection is computationally intensive and may time out on large files.
