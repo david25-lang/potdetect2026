@@ -11,8 +11,8 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 _MODELS_DIR = Path(__file__).resolve().parents[1] / "models"
-DEFAULT_ONNX_PATH = _MODELS_DIR / "best_cnn_fp16.onnx"
-DEFAULT_KERAS_PATH = _MODELS_DIR / "best_cnn.keras"
+DEFAULT_ONNX_PATH = _MODELS_DIR / "best_cnn_new.onnx"
+DEFAULT_KERAS_PATH = _MODELS_DIR / "best_model.h5"
 
 CNN_CLASSES = ["crack", "pothole"]
 CNN_INPUT_SIZE = int(os.getenv("CNN_INPUT_SIZE", "224"))
@@ -92,12 +92,7 @@ class CNNClassifier:
             raise RuntimeError("CNN model is not loaded.")
 
         resized = cv2.resize(image_bgr, (CNN_INPUT_SIZE, CNN_INPUT_SIZE))
-        # ResNet50 backbone expects caffe-style preprocessing:
-        # subtract ImageNet BGR channel means, keep 0-255 scale (no /255).
-        x = resized.astype("float32")
-        x[..., 0] -= 103.939
-        x[..., 1] -= 116.779
-        x[..., 2] -= 123.68
+        x = resized.astype("float32") / 255.0
         batch = x[np.newaxis]
 
         if self._session is not None:

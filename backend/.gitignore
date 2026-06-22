@@ -13,6 +13,10 @@ extracted_model/best.onnx
 extracted_model/best.pt
 models/best_cnn.keras
 models/best_cnn.onnx
+models/best_cnn_fp16.onnx
+models/best_cnn_new.onnx
+models/best_cnn_new_fp16.onnx
+models/best_model.h5
 models/road_damage.keras
 
 # Database is seeded fresh on each deploy
